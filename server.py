@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -334,8 +334,44 @@ async def load_model_and_data():
         logger.error(f"Error loading resources: {e}")
         raise
 
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    return FileResponse(STATIC_DIR / "index.html")
+
+@app.post("/api/generate/")
+async def generate_code_post(prompt: str = Body(..., embed=True, min_length=1, max_length=512)):
+    print(prompt)
+    if not is_ready:
+        return {
+            "status": False,
+            "error": "Server is still initializing. Please try again later."
+        }
+        
+    try:
+        inputs = tokenizer(prompt, return_tensors="pt", padding="max_length", 
+                         truncation=True, max_length=256, 
+                         add_special_tokens=False).to(device)
+        
+        outputs = model(**inputs)
+        logits = outputs.logits
+        
+        predicted_token_ids = torch.argmax(logits, dim=-1)
+        generated_code = tokenizer.decode(predicted_token_ids[0], skip_special_tokens=True)
+        
+        return {
+            "status": True,
+            "generated_code": generated_code
+        }
+    except Exception as e:
+        logger.error(f"Error generating code: {e}")
+        return {
+            "status": False,
+            "error": str(e)
+        }
+
 @app.get("/api/generate/")
 async def generate_code(prompt: str = Query(..., min_length=1, max_length=512)):
+    print(prompt)
     if not is_ready:
         return {
             "status": False,
@@ -356,7 +392,7 @@ async def generate_code(prompt: str = Query(..., min_length=1, max_length=512)):
         
         return {
             "status": True,
-            "generated_code": final_code
+            "generated_code": generated_code
         }
     
     except Exception as e:
@@ -369,7 +405,7 @@ async def generate_code(prompt: str = Query(..., min_length=1, max_length=512)):
 if __name__ == "__main__":
     logger.info(f"Starting server on {HOST}:{PORT}")
     uvicorn.run(
-        "testserver:app",  # 'app:app'에서 'testserver:app'로 수정
+        "server:app",
         host=HOST,
         port=PORT,
         reload=True,
