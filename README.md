@@ -24,7 +24,7 @@ curl -X POST "http://0.0.0.0:5059/api/generate/" -H "Content-Type: application/j
 ## Codeql 설치
 
 ```
-wget https://github.com/github/codeql-cli-binaries/releases/download/2.19.2/codeql-linux64.zip
+wget https://github.com/github/codeql-cli-binaries/releases/download/v2.19.3/codeql-linux64.zip
 ```
 
 설치가 완료 되었으면 압축 해제합니다.
@@ -69,7 +69,7 @@ git clone https://github.com/tuhh-softsec/LLMSecEval.git
 codeql database analyze <데이터베이스 폴더 위치> ./LLMSecEval/Security\ Analysis\ -\ CodeQL/Queries/py/top25/python-top25.qls --format=csv --output=results.csv
 ```
 
-이 커멘드를 입력을 하면 이 에러가 뜰 수 있음
+이 커멘드를 입력을 하면 이 에러가 뜰 수 있습니다
 
 ```
 ERROR: Pack 'codeql/python-all@0.6.2' was not found in the pack download cache. Run 'codeql pack install' to download the dependencies. (/LLMSecEval/Security Analysis - CodeQL/Queries/py/top25/qlpack.yml:1,1-1)
