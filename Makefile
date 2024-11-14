@@ -4,6 +4,7 @@
 
 # Install dependencies from requirements.txt
 install:
+	sudo apt-get update && sudo apt-get install -y liblzma-dev
 	pip install -r requirements.txt
 
 # Run the FastAPI server
